@@ -1,5 +1,5 @@
 import React from 'react';
-import ImageGalleryItem from './ImageGalleryItem';
+import ImageGalleryItem from './imageGalleryItem';
 
 const ImageGallery = ({ images, onClick }) => (
   <ul className="gallery">
