@@ -1,18 +1,18 @@
+//Plik SerchBar.jsx:
+
 import React, { Component } from 'react';
 
 class Searchbar extends Component {
-  state = {
-    query: '',
-  };
+  // state = {
+  //   query: '', // Lokalny stan do przechowywania wprowadzonych danych
+  // };
 
-  handleChange = e => {
-    this.setState({ query: e.target.value });
-  };
-
-  handleSubmit = e => {
-    e.preventDefault();
-    this.props.onSubmit(this.state.query);
-  };
+  // handleSubmit = e => {
+  //   e.preventDefault();
+  //   const { query } = this.state; // Pobieramy wartość z lokalnego stanu
+  //   this.props.onSubmit(query); // Przekazujemy wartość do rodzica
+  //   console.log(`To jest Query z SearchBar: ${query}`);
+  // };
 
   render() {
     return (
@@ -25,8 +25,6 @@ class Searchbar extends Component {
           <input
             className="input"
             type="text"
-            value={this.state.query}
-            onChange={this.handleChange}
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"

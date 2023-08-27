@@ -1,47 +1,86 @@
 import React, { Component } from 'react';
-import Searchbar from './SearchBar';
+import axios from 'axios';
+
+import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
-import ImageGalleryItem from './ImageGalleryItem';
+import Button from './Button';
+import Loader from './Loader';
+import Modal from './Modal';
+
+const API_KEY = '21202878-7eed95eba93d8479640dfcfe2';
 
 class App extends Component {
   state = {
-    images: [], // Tutaj przechowujemy wyniki z API
+    query: '',
+    images: [],
+    page: 1,
+    isLoading: false,
+    showModal: false,
+    selectedImage: '',
   };
 
-  handleSearch = query => {
-    const apiKey = '21202878-7eed95eba93d8479640dfcfe2';
-    const apiUrl = `https://pixabay.com/api/?q=${query}&page=1&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=12`;
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.query !== this.state.query) {
+      this.fetchImages();
+    }
+  }
 
-    fetch(apiUrl)
+  handleFormSubmit = query => {
+    this.setState({ query, images: [], page: 1 });
+  };
+
+  handleLoadMore = () => {
+    this.setState(
+      prevState => ({ page: prevState.page + 1 }),
+      this.fetchImages
+    );
+  };
+
+  handleImageClick = image => {
+    this.setState({ showModal: true, selectedImage: image.largeImageURL });
+  };
+
+  handleCloseModal = () => {
+    this.setState({ showModal: false, selectedImage: '' });
+  };
+
+  fetchImages = () => {
+    const { query, page } = this.state;
+    this.setState({ isLoading: true });
+
+    axios
+      .get(
+        `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
+      )
       .then(response => {
-        if (!response.ok) {
-          throw new Error('Wystąpił błąd sieciowy');
-        }
-        return response.json();
+        this.setState(prevState => ({
+          images: [...prevState.images, ...response.data.hits],
+        }));
       })
-      .then(data => {
-        // Tutaj możesz przekazać wyniki zapytania do swojego komponentu nadrzędnego lub przetworzyć dane inaczej
-        console.log('Wyniki zapytania:', data);
-        this.setState({ images: data.hits });
-      })
-      .catch(error => {
-        console.error('Błąd:', error);
+      .catch(error => console.error(error))
+      .finally(() => {
+        this.setState({ isLoading: false });
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: 'smooth',
+        });
       });
   };
 
   render() {
+    const { images, isLoading, showModal, selectedImage } = this.state;
+
     return (
       <div>
-        <Searchbar onSubmit={this.handleSearch} />
-        <ImageGallery>
-          {this.state.images.map(image => (
-            <ImageGalleryItem
-              key={image.id}
-              src={image.webformatURL}
-              alt={image.tags}
-            />
-          ))}
-        </ImageGallery>
+        <Searchbar onSubmit={this.handleFormSubmit} />
+        <ImageGallery images={images} onClick={this.handleImageClick} />
+        {isLoading && <Loader />}
+        {images.length > 0 && !isLoading && (
+          <Button onClick={this.handleLoadMore} />
+        )}
+        {showModal && (
+          <Modal onClose={this.handleCloseModal} src={selectedImage} />
+        )}
       </div>
     );
   }
