@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
 import Searchbar from './SearchBar.jsx';
 import ImageGallery from './ImageGallery.jsx';
@@ -10,6 +11,22 @@ import Modal from './Modal.jsx';
 const API_KEY = '21202878-7eed95eba93d8479640dfcfe2';
 
 class App extends Component {
+  static propTypes = {
+    // Dodaję propTypes
+    query: PropTypes.string,
+    images: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        webformatURL: PropTypes.string.isRequired,
+        largeImageURL: PropTypes.string.isRequired,
+      })
+    ),
+    page: PropTypes.number,
+    isLoading: PropTypes.bool,
+    showModal: PropTypes.bool,
+    selectedImage: PropTypes.string,
+  };
+
   state = {
     query: '',
     images: [],
@@ -23,6 +40,7 @@ class App extends Component {
     if (prevState.query !== this.state.query) {
       this.fetchImages();
     }
+    //this.fetchImages();
   }
 
   handleFormSubmit = query => {
@@ -32,7 +50,7 @@ class App extends Component {
   handleLoadMore = () => {
     this.setState(
       prevState => ({ page: prevState.page + 1 }),
-      this.fetchImages
+      this.fetchImages // przenosiłem do didUpdate ale tam wyskakuje błąd zapętlenia ...
     );
   };
 
@@ -79,7 +97,10 @@ class App extends Component {
           <Button onClick={this.handleLoadMore} />
         )}
         {showModal && (
-          <Modal onClose={this.handleCloseModal} src={selectedImage} />
+          <Modal
+            onClose={this.handleCloseModal}
+            largeImageURL={selectedImage}
+          />
         )}
       </div>
     );
