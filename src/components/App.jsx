@@ -40,7 +40,12 @@ class App extends Component {
     if (prevState.query !== this.state.query) {
       this.fetchImages();
     }
-    //this.fetchImages();
+    if (
+      prevState.page !== this.state.page &&
+      prevState.query === this.state.query
+    ) {
+      this.fetchImages();
+    }
   }
 
   handleFormSubmit = query => {
@@ -48,10 +53,7 @@ class App extends Component {
   };
 
   handleLoadMore = () => {
-    this.setState(
-      prevState => ({ page: prevState.page + 1 }),
-      this.fetchImages // przenosiłem do didUpdate ale tam wyskakuje błąd zapętlenia ...
-    );
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   handleImageClick = image => {
