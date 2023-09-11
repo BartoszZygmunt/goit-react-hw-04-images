@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 //import PropTypes from 'prop-types';
 
@@ -18,10 +18,30 @@ function App() {
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
 
+  const fetchImages = useCallback(() => {
+    setIsLoading(true);
+
+    axios
+      .get(
+        `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
+      )
+      .then(response => {
+        setImages(prevImages => [...prevImages, ...response.data.hits]);
+      })
+      .catch(error => console.error(error))
+      .finally(() => {
+        setIsLoading(false);
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: 'smooth',
+        });
+      });
+  }, [query, page]);
+
   useEffect(() => {
     if (query === '') return;
     fetchImages();
-  }, [query, page]);
+  }, [query, page, fetchImages]);
 
   const handleFormSubmit = query => {
     setQuery(query);
@@ -41,26 +61,6 @@ function App() {
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedImage('');
-  };
-
-  const fetchImages = () => {
-    setIsLoading(true);
-
-    axios
-      .get(
-        `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
-      )
-      .then(response => {
-        setImages(prevImages => [...prevImages, ...response.data.hits]);
-      })
-      .catch(error => console.error(error))
-      .finally(() => {
-        setIsLoading(false);
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: 'smooth',
-        });
-      });
   };
 
   return (
